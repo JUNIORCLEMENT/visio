@@ -14,11 +14,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY package.json package-lock.json ./
+# Copie depuis le dossier backend/ vers la racine du conteneur (/app)
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
 
-COPY src ./src
-COPY assets ./assets
+# Copie du code source et des assets depuis backend/
+COPY backend/src ./src
+COPY backend/assets ./assets
 
 # Récupération des fichiers Angular compilés depuis l'étape 1
 COPY --from=frontend-build /app/frontend/dist/frontend/browser ./public
