@@ -1,0 +1,245 @@
+/* =====================================================================
+   HPO Visio — styles globaux (charte HPO & Associés)
+   Police Poppins embarquée (fonctionne sans accès Internet).
+   ===================================================================== */
+@use '@fontsource/poppins/latin-400.css';
+@use '@fontsource/poppins/latin-500.css';
+@use '@fontsource/poppins/latin-600.css';
+@use '@fontsource/poppins/latin-700.css';
+
+:root {
+  --ground: #ECEAF4;
+  --shell: #FFFFFF;
+  --panel: #F5F4FA;
+  --line: #E7E4F0;
+  --ink: #16131F;
+  --muted: #625D72;
+  --faint: #8E889E;
+  --blue: #2B0F86;
+  --blue-soft: #ECE7FB;
+  --brand: #20036F;
+  --violet: #6A4FE0;
+  --red: #E5323B;
+  --red-soft: #FDE8E9;
+  --orange: #C2620F;
+  --orange-soft: #FDF0E3;
+  --info: #1E5AA8;
+  --info-soft: #E3EEFB;
+  --stage: #1C1828;
+  --tile: #2A2539;
+  --shadow: 0 18px 40px rgba(32, 3, 111, .08);
+  --radius: 22px;
+  color-scheme: light;
+}
+
+@mixin dark-tokens {
+  --ground: #0F0D17;
+  --shell: #18151F;
+  --panel: #211D2B;
+  --line: #2E2939;
+  --ink: #F0EEF6;
+  --muted: #ABA5BC;
+  --faint: #857F96;
+  --blue: #7C63F0;
+  --blue-soft: #2A2150;
+  --brand: #2B0F86;
+  --violet: #8E6BEA;
+  --red: #F2575E;
+  --red-soft: #3A1A1E;
+  --orange: #F2A35E;
+  --orange-soft: #3A2716;
+  --info: #7DB2F0;
+  --info-soft: #172A40;
+  --stage: #0B0A10;
+  --tile: #242031;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { @include dark-tokens; }
+}
+:root[data-theme="dark"] { @include dark-tokens; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Poppins, "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
+h2 { margin: 0; font-size: 18px; font-weight: 600; }
+h3 { margin: 0; font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Mise en page -------------------------------------------- */
+.card {
+  background: var(--shell);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  min-width: 0;
+}
+.row { display: flex; align-items: center; gap: 10px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.sub { color: var(--muted); font-size: 13px; }
+.hint { color: var(--faint); font-size: 12px; }
+.mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; }
+.grow { flex: 1; min-width: 0; }
+.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Boutons ------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent;
+  font-weight: 500; white-space: nowrap; text-decoration: none !important;
+  transition: background .15s, border-color .15s, opacity .15s;
+}
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--brand); }
+.btn.ghost { background: var(--panel); border-color: var(--line); color: var(--ink); }
+.btn.ghost:hover:not(:disabled) { border-color: var(--faint); }
+.btn.danger { background: var(--red); color: #fff; }
+.btn.wide { width: 100%; }
+.btn.sm { height: 34px; padding: 0 14px; font-size: 13px; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+
+.mini {
+  height: 30px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); white-space: nowrap;
+}
+.mini:hover:not(:disabled) { border-color: var(--faint); }
+.mini.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, var(--line)); }
+.mini.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.mini:disabled { opacity: .5; cursor: not-allowed; }
+
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--muted);
+}
+.icon-btn:hover { background: var(--panel); color: var(--ink); }
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* ---------- Champs -------------------------------------------------- */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.input, .field input, .field select, .field textarea {
+  width: 100%; height: 44px; padding: 0 14px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); outline: none;
+}
+.field textarea { height: auto; min-height: 96px; padding: 12px 14px; resize: vertical; }
+.input:focus, .field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue); background: var(--shell);
+}
+.field input[aria-invalid="true"] { border-color: var(--red); }
+.check { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--blue); }
+
+.alert {
+  border-radius: 14px; padding: 12px 14px; font-size: 13px; line-height: 1.45;
+  background: var(--info-soft); color: var(--info);
+}
+.alert.error { background: var(--red-soft); color: var(--red); }
+.alert.warn { background: var(--orange-soft); color: var(--orange); }
+
+/* ---------- Pastilles de statut (pas de vert : charte HPO) ---------- */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 500; white-space: nowrap;
+  background: var(--panel); color: var(--muted);
+}
+.pill.ok { background: var(--blue-soft); color: var(--blue); }
+.pill.live { background: var(--blue); color: #fff; }
+.pill.warn { background: var(--orange-soft); color: var(--orange); }
+.pill.off { background: var(--red-soft); color: var(--red); }
+.pill.info { background: var(--info-soft); color: var(--info); }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* ---------- Tableaux ------------------------------------------------ */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; color: var(--muted); background: var(--panel); padding: 10px 14px; white-space: nowrap; }
+td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: middle; }
+td select { height: 32px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); padding: 0 8px; }
+.empty { padding: 26px; text-align: center; color: var(--faint); }
+
+/* ---------- Onglets ------------------------------------------------- */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border-radius: 999px; flex-wrap: wrap; }
+.tabs button {
+  border: none; background: transparent; height: 34px; padding: 0 14px; border-radius: 999px;
+  color: var(--muted); font-weight: 500; font-size: 13px;
+}
+.tabs button.on { background: var(--shell); color: var(--ink); box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+
+/* ---------- Interrupteur -------------------------------------------- */
+.switch {
+  position: relative; width: 46px; height: 26px; border-radius: 999px; border: none; flex: none;
+  background: var(--line); transition: background .15s;
+}
+.switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s;
+}
+.switch[aria-checked="true"] { background: var(--blue); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+.switch:disabled { opacity: .5; }
+
+/* ---------- Boîte de dialogue --------------------------------------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; background: rgba(16, 10, 30, .45);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.dialog {
+  background: var(--shell); border-radius: 24px; width: min(640px, 100%); max-height: calc(100vh - 32px);
+  overflow: auto; padding: 24px; box-shadow: 0 30px 80px rgba(0, 0, 0, .25);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.dialog.wide { width: min(920px, 100%); }
+.dialog-foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- Avatar -------------------------------------------------- */
+.av {
+  flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 600; width: 36px; height: 36px; font-size: 12px;
+}
+.av.m { width: 44px; height: 44px; font-size: 14px; }
+.av.l { width: 72px; height: 72px; font-size: 24px; }
+.c0 { background: #FDE7D6; color: #7A3A0C; }
+.c1 { background: #DCE6FB; color: #1E3A6B; }
+.c2 { background: #E9E3FA; color: #45307A; }
+.c3 { background: #FBE0E6; color: #7A1F35; }
+.c4 { background: #E3F0F7; color: #1D4D66; }
+.c5 { background: #F6EBD3; color: #6B4A0E; }
+
+/* ---------- Divers -------------------------------------------------- */
+.spin {
+  width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line);
+  border-top-color: var(--blue); animation: spin .8s linear infinite; flex: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
+
+.logo-light { display: block; }
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: block; }
+}

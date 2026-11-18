@@ -1,0 +1,146 @@
+# =====================================================================
+#  HPO Visio — Angular + Express + PostgreSQL + LiveKit (+ Egress pour l'enregistrement)
+#
+#  Premier lancement :
+#    cp .env.example .env      (puis remplir les valeurs « À DÉFINIR »)
+#    docker compose up -d --build
+#  Développement avec boîte mail de test (Mailpit, http://localhost:8025) :
+#    docker compose --profile dev up -d --build
+# =====================================================================
+name: hpo-visio
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hpo_visio
+      POSTGRES_USER: hpo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définir POSTGRES_PASSWORD dans .env}
+      TZ: Africa/Libreville
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      # Schéma + données de démonstration, exécutés au tout premier démarrage
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hpo -d hpo_visio"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # File d'attente partagée entre LiveKit et le service d'enregistrement
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+
+  livekit:
+    # Fixer une version validée en production (ex. livekit/livekit-server:v1.x.y)
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    command: --node-ip ${LIVEKIT_NODE_IP:?Définir LIVEKIT_NODE_IP (adresse IP du serveur) dans .env}
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+      # Configuration complète du serveur vidéo
+      LIVEKIT_CONFIG: |
+        port: 7880
+        bind_addresses: ["0.0.0.0"]
+        rtc:
+          tcp_port: 7881
+          udp_port: 7882
+          use_external_ip: false
+        redis:
+          address: redis:6379
+        room:
+          empty_timeout: 300
+          max_participants: 100
+        # Arrivées, départs et fin des enregistrements → API (comptes rendus, onglet Enregistrements)
+        webhook:
+          api_key: ${LIVEKIT_API_KEY}
+          urls:
+            - http://backend:3000/api/livekit/webhook
+        logging:
+          level: info
+    ports:
+      - "7881:7881/tcp"   # média en TCP (repli)
+      - "7882:7882/udp"   # média en UDP
+    depends_on:
+      - redis
+
+  # Donne au service d'enregistrement et à l'API le droit d'écrire dans le dossier partagé
+  recordings-init:
+    image: busybox:1.36
+    command: ["sh", "-c", "chmod 0777 /recordings"]
+    volumes:
+      - recordings:/recordings
+
+  # Enregistrement automatique de chaque réunion et appel (MP4 dans le volume « recordings »)
+  egress:
+    # Fixer une version validée en production (ex. livekit/egress:v1.x.y)
+    image: livekit/egress:latest
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN          # nécessaire au navigateur intégré qui compose la vidéo
+    environment:
+      EGRESS_CONFIG_BODY: |
+        api_key: ${LIVEKIT_API_KEY}
+        api_secret: ${LIVEKIT_API_SECRET}
+        ws_url: ws://livekit:7880
+        redis:
+          address: redis:6379
+        log_level: info
+    volumes:
+      - recordings:/out
+    depends_on:
+      redis:
+        condition: service_started
+      livekit:
+        condition: service_started
+      recordings-init:
+        condition: service_completed_successfully
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: Africa/Libreville
+      DATABASE_URL: postgres://hpo:${POSTGRES_PASSWORD}@db:5432/hpo_visio
+      LIVEKIT_API_URL: http://livekit:7880
+      TRUST_PROXY: "true"
+      RECORDINGS_DIR: /recordings
+      EGRESS_OUTPUT_DIR: /out
+    volumes:
+      # Enregistrements (lecture, téléchargement et suppression depuis l'onglet Admin)
+      - recordings:/recordings
+    depends_on:
+      db:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+      recordings-init:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - backend
+      - livekit
+
+  # Boîte mail de test : capte tous les e-mails envoyés (développement uniquement)
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ["dev"]
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+
+volumes:
+  db-data:
+  # Enregistrements des réunions et appels : à sauvegarder / placer sur un disque de taille suffisante
+  recordings:
